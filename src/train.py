@@ -129,8 +129,11 @@ def summarize():
         print(f"No results found at {OUT}")
         return
     d = pd.read_csv(OUT)
-    g = d.groupby(["model", "setting", "train", "test"])[["acc", "f1", "sens", "spec", "auc", "ece"]]
-    s = g.mean().round(4).astype(str) + " ± " + g.std().round(4).astype(str)
+    metrics_cols = ["acc", "f1", "sens", "spec", "auc", "ece"]
+    g = d.groupby(["model", "setting", "train", "test"])[metrics_cols]
+    m = g.mean().round(4)
+    s_std = g.std(ddof=1).fillna(0.0).round(4)
+    s = m.astype(str) + " ± " + s_std.astype(str)
     s["runs"] = g.size()
     s.to_csv("results/summary.csv")
     print(s.to_string())
